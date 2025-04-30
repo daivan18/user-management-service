@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>管理員總覽</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 返回首頁按鈕 -->
+        <div class="top-bar">
+            <a href="/users" class="back-button">← 返回首頁</a>
+        </div>
+
+        <h2>所有使用者帳號資訊</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>使用者名稱</th>
+                    <th>修改密碼</th>
+                    <th>更新時間</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{range .Users}}
+                <tr>
+                    <td>{{.ID}}</td>
+                    <td>{{.Username}}</td>
+                    <td>
+                        <form method="POST" action="/admin/reset-password">
+                            <input type="hidden" name="id" value="{{.ID}}">
+                            <input type="password" name="new_password" placeholder="輸入新密碼" required>
+                            <button type="submit">確認</button>
+                        </form>
+                    </td>
+                    <td>{{.Update_Time.Format "2006-01-02 15:04:05"}}</td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

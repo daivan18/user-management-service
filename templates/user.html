@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <title>使用者管理系統</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        margin: 40px;
+        background-color: #f4f4f4;
+      }
+
+      h1,
+      h2 {
+        color: #333;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        margin-bottom: 30px;
+      }
+
+      th,
+      td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+
+      th {
+        background-color: #007bff;
+        color: white;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      form {
+        margin-bottom: 15px;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        padding: 8px;
+        width: 200px;
+        margin-right: 10px;
+      }
+
+      button {
+        padding: 8px 14px;
+        border: none;
+        background-color: #28a745;
+        color: white;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      button:hover {
+        background-color: #218838;
+      }
+
+      .delete-btn {
+        background-color: #dc3545;
+      }
+
+      .delete-btn:hover {
+        background-color: #c82333;
+      }
+
+      .edit-btn {
+        background-color: #ffc107;
+        color: #333;
+      }
+
+      .edit-btn:hover {
+        background-color: #e0a800;
+      }
+
+      .success-message {
+        background-color: #e0f7e9;
+        color: #2e7d32;
+        padding: 12px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+
+      .error-message {
+        background-color: #fdecea;
+        color: #b71c1c;
+        padding: 12px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>使用者清單</h1>
+
+    {{if .success}}
+    <div class="success-message">{{.success}}</div>
+    {{end}} {{if .error}}
+    <div class="error-message">{{.error}}</div>
+    {{end}}
+
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>帳號</th>
+        <th>操作</th>
+      </tr>
+      {{range .users}}
+      <tr>
+        <td>{{.id}}</td>
+        <td>{{.username}}</td>
+        <td>
+          <form
+            action="/users/{{.id}}/delete"
+            method="POST"
+            style="display: inline"
+          >
+            <button type="submit" class="delete-btn">刪除</button>
+          </form>
+          <form
+            action="/users/{{.id}}/edit"
+            method="GET"
+            style="display: inline"
+          >
+            <button type="submit" class="edit-btn">編輯</button>
+          </form>
+        </td>
+      </tr>
+      {{end}}
+    </table>
+    <!-- 管理員登入入口 -->
+    <a href="/admin" class="admin-btn">管理員登入</a>
+
+    <h2>新增使用者</h2>
+    <form action="/users" method="POST">
+      <input type="text" name="username" placeholder="帳號" required />
+      <input type="password" name="password" placeholder="密碼" required />
+      <button type="submit">新增</button>
+    </form>
+  </body>
+  <script>
+    window.onload = function () {
+      setTimeout(function () {
+        let success = document.querySelector(".success-message");
+        let error = document.querySelector(".error-message");
+        if (success) success.style.display = "none";
+        if (error) error.style.display = "none";
+      }, 3000); // 3 秒後消失
+    };
+
+    // 清除網址上的 success/error query 參數
+    if (window.history.replaceState) {
+      const url = new URL(window.location);
+      url.searchParams.delete("success");
+      url.searchParams.delete("error");
+      window.history.replaceState({}, document.title, url.pathname);
+    }
+  </script>
+</html>

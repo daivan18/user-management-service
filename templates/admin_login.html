@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex; /* 使用 Flexbox 居中內容 */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* 確保佔滿整個視窗高度 */
+            background: #e9ecef;
+            margin: 0; /* 移除 body 預設的 margin */
+            padding: 20px; /* 增加 body 內邊距，防止內容貼邊 */
+            box-sizing: border-box; /* 包含 padding 和 border 在元素尺寸內 */
+        }
+
+        .login-box {
+            width: 350px; /* 稍微增加寬度 */
+            padding: 40px; /* 增加內邊距 */
+            background: white;
+            border-radius: 12px; /* 更大的圓角 */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 更柔和的陰影 */
+            text-align: center; /* 標題和按鈕居中 */
+        }
+
+        .login-box h2 {
+            color: #343a40;
+            margin-bottom: 25px;
+        }
+
+        .login-box input[type="text"],
+        .login-box input[type="password"] {
+            width: calc(100% - 22px); /* 考慮內邊距和邊框 */
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box; /* 包含 padding 和 border */
+            font-size: 16px;
+        }
+
+        .login-box input[type="text"]:focus,
+        .login-box input[type="password"]:focus {
+            border-color: #007bff; /* Focus 時的邊框顏色 */
+            outline: none; /* 移除預設的 focus 樣式 */
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* 添加 focus 時的陰影 */
+        }
+
+        .login-box input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease; /* 添加過渡效果 */
+        }
+
+        .login-box input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: #dc3545;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Admin Login</h2>
+        <form method="POST" action="/admin">
+            <input type="text" name="username" placeholder="Username" required />
+            <input type="password" name="password" placeholder="Password" required />
+            <input type="submit" value="Login" />
+        </form>
+        {{if .Error}}<div class="error">{{.Error}}</div>{{end}}
+    </div>
+</body>
+</html>
