@@ -1,27 +1,26 @@
-<!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Login</title>
+    <title>Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex; /* 使用 Flexbox 居中內容 */
+            display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh; /* 確保佔滿整個視窗高度 */
+            min-height: 100vh;
             background: #e9ecef;
-            margin: 0; /* 移除 body 預設的 margin */
-            padding: 20px; /* 增加 body 內邊距，防止內容貼邊 */
-            box-sizing: border-box; /* 包含 padding 和 border 在元素尺寸內 */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .login-box {
-            width: 350px; /* 稍微增加寬度 */
-            padding: 40px; /* 增加內邊距 */
+            width: 350px;
+            padding: 40px;
             background: white;
-            border-radius: 12px; /* 更大的圓角 */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 更柔和的陰影 */
-            text-align: center; /* 標題和按鈕居中 */
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
         }
 
         .login-box h2 {
@@ -31,20 +30,13 @@
 
         .login-box input[type="text"],
         .login-box input[type="password"] {
-            width: calc(100% - 22px); /* 考慮內邊距和邊框 */
+            width: calc(100% - 22px);
             padding: 12px;
             margin-bottom: 15px;
             border: 1px solid #ced4da;
             border-radius: 6px;
-            box-sizing: border-box; /* 包含 padding 和 border */
+            box-sizing: border-box;
             font-size: 16px;
-        }
-
-        .login-box input[type="text"]:focus,
-        .login-box input[type="password"]:focus {
-            border-color: #007bff; /* Focus 時的邊框顏色 */
-            outline: none; /* 移除預設的 focus 樣式 */
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* 添加 focus 時的陰影 */
         }
 
         .login-box input[type="submit"] {
@@ -56,11 +48,23 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 18px;
-            transition: background-color 0.3s ease; /* 添加過渡效果 */
+            transition: background-color 0.3s ease;
         }
 
         .login-box input[type="submit"]:hover {
             background-color: #0056b3;
+        }
+
+        .login-box a {
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .login-box a:hover {
+            text-decoration: underline;
         }
 
         .error {
@@ -72,12 +76,13 @@
 </head>
 <body>
     <div class="login-box">
-        <h2>Admin Login</h2>
-        <form method="POST" action="/admin">
+        <h2>Login</h2>
+        <form method="POST" action="/login">
             <input type="text" name="username" placeholder="Username" required />
             <input type="password" name="password" placeholder="Password" required />
             <input type="submit" value="Login" />
         </form>
+        <a href="/register">還沒有帳號？點此註冊</a>
         {{if .Error}}<div class="error">{{.Error}}</div>{{end}}
     </div>
 </body>

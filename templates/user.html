@@ -8,11 +8,30 @@
         font-family: "Segoe UI", sans-serif;
         margin: 40px;
         background-color: #f4f4f4;
+        position: relative;
       }
 
-      h1,
-      h2 {
+      h1, h2 {
         color: #333;
+      }
+
+      .logout-form {
+        position: absolute;
+        top: 20px;
+        right: 40px;
+      }
+
+      .logout-form button {
+        padding: 6px 12px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .logout-form button:hover {
+        background-color: #5a6268;
       }
 
       table {
@@ -22,8 +41,7 @@
         margin-bottom: 30px;
       }
 
-      th,
-      td {
+      th, td {
         padding: 12px 15px;
         border: 1px solid #ddd;
         text-align: left;
@@ -36,30 +54,6 @@
 
       tr:nth-child(even) {
         background-color: #f9f9f9;
-      }
-
-      form {
-        margin-bottom: 15px;
-      }
-
-      input[type="text"],
-      input[type="password"] {
-        padding: 8px;
-        width: 200px;
-        margin-right: 10px;
-      }
-
-      button {
-        padding: 8px 14px;
-        border: none;
-        background-color: #28a745;
-        color: white;
-        cursor: pointer;
-        border-radius: 4px;
-      }
-
-      button:hover {
-        background-color: #218838;
       }
 
       .delete-btn {
@@ -97,69 +91,65 @@
     </style>
   </head>
   <body>
+    <!-- 登出按鈕 -->
+    <form class="logout-form" method="GET" action="/logout">
+      <button type="submit">登出</button>
+    </form>
+
     <h1>使用者清單</h1>
 
     {{if .success}}
     <div class="success-message">{{.success}}</div>
-    {{end}} {{if .error}}
+    {{end}} 
+    {{if .error}}
     <div class="error-message">{{.error}}</div>
     {{end}}
 
     <table>
       <tr>
-        <th>ID</th>
         <th>帳號</th>
+        <th>手機號碼</th>
         <th>操作</th>
       </tr>
       {{range .users}}
       <tr>
-        <td>{{.id}}</td>
         <td>{{.username}}</td>
+        <td>{{.cell_phone}}</td>
         <td>
-          <form
-            action="/users/{{.id}}/delete"
-            method="POST"
-            style="display: inline"
-          >
+          <form action="/users/{{.id}}/delete" method="POST" style="display: inline" onsubmit="return confirmDelete()">
             <button type="submit" class="delete-btn">刪除</button>
           </form>
-          <form
-            action="/users/{{.id}}/edit"
-            method="GET"
-            style="display: inline"
-          >
+          <form action="/users/{{.id}}/edit" method="GET" style="display: inline">
             <button type="submit" class="edit-btn">編輯</button>
           </form>
         </td>
       </tr>
       {{end}}
     </table>
-    <!-- 管理員登入入口 -->
-    <a href="/admin" class="admin-btn">管理員登入</a>
 
-    <h2>新增使用者</h2>
-    <form action="/users" method="POST">
-      <input type="text" name="username" placeholder="帳號" required />
-      <input type="password" name="password" placeholder="密碼" required />
-      <button type="submit">新增</button>
-    </form>
+    <script>
+      // 刪除確認
+      function confirmDelete() {
+        return confirm("確定要刪除這位使用者嗎？");
+      }
+
+      // 成功/錯誤訊息自動消失
+      window.onload = function () {
+        setTimeout(function () {
+          let success = document.querySelector(".success-message");
+          let error = document.querySelector(".error-message");
+          if (success) success.style.display = "none";
+          if (error) error.style.display = "none";
+        }, 3000);
+      };
+
+      // 移除 URL 中的 success/error 參數
+      if (window.history.replaceState) {
+        const url = new URL(window.location);
+        url.searchParams.delete("success");
+        url.searchParams.delete("error");
+        window.history.replaceState({}, document.title, url.pathname);
+      }
+    </script>
   </body>
-  <script>
-    window.onload = function () {
-      setTimeout(function () {
-        let success = document.querySelector(".success-message");
-        let error = document.querySelector(".error-message");
-        if (success) success.style.display = "none";
-        if (error) error.style.display = "none";
-      }, 3000); // 3 秒後消失
-    };
-
-    // 清除網址上的 success/error query 參數
-    if (window.history.replaceState) {
-      const url = new URL(window.location);
-      url.searchParams.delete("success");
-      url.searchParams.delete("error");
-      window.history.replaceState({}, document.title, url.pathname);
-    }
-  </script>
 </html>

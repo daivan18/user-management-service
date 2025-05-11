@@ -8,56 +8,86 @@ import (
 
 	models "github.com/daivan18/user-management-service/model"
 	"github.com/daivan18/user-management-service/utils"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func ShowUserList(c *gin.Context) {
-	var users []models.User
-
-	if err := utils.GetDB().Select("id", "username").Find(&users).Error; err != nil {
-		log.Println("查詢錯誤:", err)
-		c.String(http.StatusInternalServerError, "DB error")
+	// 從 session 中提取 username
+	session := sessions.Default(c)
+	username := session.Get("username")
+	if username == nil {
+		c.Redirect(http.StatusFound, "/login")
 		return
+	}
+
+	var users []models.User
+	db := utils.GetDB()
+
+	if username == "admin" {
+		if err := db.Select("id", "username", "cell_phone").Find(&users).Error; err != nil {
+			c.String(http.StatusInternalServerError, "DB error")
+			return
+		}
+	} else {
+		var user models.User
+		if err := db.Select("id", "username", "cell_phone").Where("username = ?", username).First(&user).Error; err != nil {
+			c.String(http.StatusInternalServerError, "DB error")
+			return
+		}
+		users = append(users, user)
 	}
 
 	var userList []map[string]interface{}
 	for _, u := range users {
+
+		var err error
+
+		// 解密手機號碼
+		var decryptedPhone string
+
+		if u.CellPhone != "" {
+			// 如果手機號碼不為空，才進行解密
+			decryptedPhone, err = utils.Decrypt(u.CellPhone)
+			if err != nil {
+				// 如果解密失敗，設為 "解密失敗"
+				decryptedPhone = "解密失敗"
+			}
+		} else {
+			// 如果手機號碼為空，直接設為空
+			decryptedPhone = ""
+		}
+
+		// 對解密後的手機號碼進行遮蔽處理
+		maskedPhone := decryptedPhone
+		//maskedPhone := utils.MaskPhone(decryptedPhone)
+
 		userList = append(userList, map[string]interface{}{
-			"id":       u.ID,
-			"username": u.Username,
+			"id":         u.ID,
+			"username":   u.Username,
+			"cell_phone": maskedPhone,
 		})
 	}
 
-	// 成功訊息
-	successMessage := ""
-	switch c.Query("success") {
-	case "created":
-		successMessage = "User created successfully!"
-	case "updated":
-		successMessage = "User updated successfully!"
-	case "deleted":
-		successMessage = "User deleted successfully!"
-	}
-
-	errorMessage := c.Query("error")
-
 	c.HTML(http.StatusOK, "user.html", gin.H{
 		"users":   userList,
-		"success": successMessage,
-		"error":   errorMessage,
+		"success": c.Query("success"),
+		"error":   c.Query("error"),
 	})
 }
 
 func CreateUser(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
+	cellPhone := c.PostForm("cell_phone")
 
-	if isUsernameExists(username) {
-		c.Redirect(http.StatusSeeOther, "/users?error="+url.QueryEscape("帳號已存在"))
+	// 確認手機號碼是否已存在
+	if utils.IsCellPhoneExists(utils.GetDB(), cellPhone) {
+		c.Redirect(http.StatusSeeOther, "/users?error="+url.QueryEscape("手機號碼已被註冊"))
 		return
 	}
 
+	// 密碼加密
 	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
 		log.Println("Hash failed:", err)
@@ -65,9 +95,19 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
+	// 手機號碼加密
+	encryptedPhone, err := utils.Encrypt(cellPhone)
+	if err != nil {
+		log.Println("Encrypt phone failed:", err)
+		c.String(http.StatusInternalServerError, "Error encrypting phone")
+		return
+	}
+
+	// 創建新用戶
 	user := models.User{
 		Username:      username,
 		Password_Hash: hashedPassword,
+		CellPhone:     encryptedPhone,
 		Create_Time:   time.Now(),
 	}
 
@@ -78,12 +118,6 @@ func CreateUser(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusSeeOther, "/users?success=created")
-}
-
-func isUsernameExists(username string) bool {
-	var count int64
-	utils.GetDB().Model(&models.User{}).Where("username = ?", username).Count(&count)
-	return count > 0
 }
 
 func EditUserPage(c *gin.Context) {
@@ -106,6 +140,15 @@ func UpdateUser(c *gin.Context) {
 	id := c.Param("id")
 	username := c.PostForm("username")
 	password := c.PostForm("password")
+	//cellPhone := c.PostForm("cell_phone")
+
+	// 確認手機號碼是否已存在
+	/*
+		if utils.IsCellPhoneExists(utils.GetDB(), cellPhone) {
+			c.Redirect(http.StatusSeeOther, "/users?error="+url.QueryEscape("手機號碼已被註冊"))
+			return
+		}
+	*/
 
 	// 雜湊密碼
 	hashedPassword, err := utils.HashPassword(password)
@@ -141,63 +184,6 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusSeeOther, "/users?success=deleted")
-}
-
-// ShowAdminLoginPage 顯示管理員登入頁面
-func ShowAdminLoginPage(c *gin.Context) {
-	c.HTML(200, "admin_login.html", nil)
-}
-
-// VerifyAdminLogin 驗證管理員帳號與密碼
-func VerifyAdminLogin(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-
-	// 獲取資料庫連線
-	db := utils.GetDB()
-
-	// 查詢資料庫中是否有此用戶
-	var admin models.User
-	if err := db.Where("username = ?", username).First(&admin).Error; err != nil {
-		// 賬號不存在
-		c.HTML(401, "admin_login.html", gin.H{
-			"Error": "帳號或密碼錯誤",
-		})
-		return
-	}
-
-	// 驗證密碼（解密密碼）
-	err := bcrypt.CompareHashAndPassword([]byte(admin.Password_Hash), []byte(password))
-	if err != nil {
-		// 密碼不匹配
-		c.HTML(401, "admin_login.html", gin.H{
-			"Error": "帳號或密碼錯誤",
-		})
-		return
-	}
-
-	// 密碼驗證通過，跳轉到管理員頁面
-	c.Redirect(302, "/admin/users")
-}
-
-// ShowAllUsersWithPassword 顯示所有帳號與密碼（測試用，不建議正式使用）
-func ShowAllUsersWithPassword(c *gin.Context) {
-	// 定義一個 User 陣列來儲存所有用戶資料
-	var users []models.User
-
-	// 獲取資料庫連線
-	db := utils.GetDB()
-
-	// 使用 GORM 查詢所有用戶資料
-	if err := db.Find(&users).Error; err != nil {
-		c.JSON(500, gin.H{"error": "無法獲取用戶資料"})
-		return
-	}
-
-	// 返回結果給前端，顯示所有用戶資料
-	c.HTML(200, "admin.html", gin.H{
-		"Users": users,
-	})
 }
 
 // 重設密碼

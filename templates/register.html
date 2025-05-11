@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>註冊帳號</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .register-box {
+            width: 400px;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 17px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .btn-register {
+            background-color: #28a745;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .btn-register:hover {
+            background-color: #218838;
+        }
+
+        .btn-back {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background-color: #0069d9;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .success {
+            color: green;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-box">
+        <h2>註冊新帳號</h2>
+
+        <!-- 顯示後端訊息 -->
+        {{ if .Error }}
+            <p id="error-message" class="error">{{ .Error }}</p>
+        {{ end }}
+
+        {{ if .Success }}
+            <script>
+                alert("{{ .Success }}");
+                window.location.href = "/login";
+            </script>
+        {{ end }}
+
+        <form method="POST" action="/register" onsubmit="return validateForm()">
+            <input type="text" name="username" placeholder="帳號" required />
+            <input type="password" id="password" name="password" placeholder="密碼" required />
+            <input type="password" id="confirm_password" placeholder="確認密碼" required />
+            <input type="text" name="cell_phone" placeholder="手機號碼" required />
+            <button type="submit" class="btn btn-register">註冊</button>
+        </form>
+
+        <p id="pw-error" class="error" style="display:none;">密碼不一致</p>
+
+        <a href="/login" class="btn btn-back">返回登入頁面</a>
+    </div>
+
+    <script>
+        function validateForm() {
+            const pw = document.getElementById("password").value;
+            const confirm = document.getElementById("confirm_password").value;
+            const error = document.getElementById("pw-error");
+
+            if (pw !== confirm) {
+                error.style.display = "block";
+                return false;
+            }
+            error.style.display = "none";
+            return true;
+        }
+
+        // 當頁面載入後，顯示錯誤訊息並在3秒後隱藏
+        window.onload = function() {
+            const errorMessage = document.getElementById("error-message");
+            if (errorMessage) {
+                // 顯示錯誤訊息
+                errorMessage.style.display = "block";
+                // 設定3秒後自動隱藏
+                setTimeout(function() {
+                    errorMessage.style.display = "none";
+                }, 3000); // 3秒後隱藏
+            }
+        }
+    </script>
+</body>
+</html>

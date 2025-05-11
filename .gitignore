@@ -1,0 +1,88 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go build output
+/build/
+/bin/
+/dist/
+*.log
+
+# Dependency directories (optional, if you use vendoring)
+vendor/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+*.orig
+
+# Configuration files you don't want to share
+.env
+.env.*
+config.local.*
+settings.local.*
+secrets.yml
+
+# Go coverage and test results
+*.coverprofile
+*.testresult
+
+# Render deploy artifacts (if any)
+render.yaml
+
+# Module cache (optional)
+go.sum
+
+# Optional: ignore PostgreSQL data dumps or dev DBs
+*.sql
+*.sqlite
+*.db
+
+# Frontend if embedded (optional, if using web UI)
+node_modules/
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+__debug_bin*
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Editor / OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Dependency directories
+vendor/
+
+# Logs / debug / temp
+*.log
+*.tmp
+*.bak
+*.old
+
+# Build directory (if you use one)
+bin/
+dist/
